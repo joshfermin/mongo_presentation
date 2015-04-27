@@ -210,17 +210,28 @@
 						<pre><code>mkdir /data/shard1</pre></code>
 						<pre><code>mongod --dbpath /data/shard1 --port 27018 --shardsvr</pre></code>
 						<ul>
-							<li></li>
-							<li>Distributed collection of items</li>
-							<li>Can be stored in the volatile memory or in a persistent storage </li>
+							<li>This starts a standalone mongod instance</li>
 						</ul>
 					</section>
 
 					<section>
-						<h2>RDDs</h2>
-						<img src="http://3.bp.blogspot.com/-J7R0TMXgz04/UuKIuoeANDI/AAAAAAAAKxM/RyuhMwSLLS0/s1600/mr-flow.png"></img>
+						<h2>Create another Shard</h2>
+						<pre><code>mkdir /data/shard2</pre></code>
+						<pre><code>mongod --dbpath /data/shard2 --port 27020 --shardsvr</pre></code>
 						<ul>
-						<li> Reading and writing happens too often for each Map Reduce (MR)</li>
+							<li>Note different port</li>
+							<li>Data will be partitioned to these two shards, based on shard key</li>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Fire up mongos router</h2>
+						<pre><code>mongo --port 27017</pre></code>
+						<pre><code>mongos> sh.addShard("localhost:27018")</pre></code>
+						<pre><code>mongos> sh.addShard("localhost:27020")</pre></code>
+						<ul>
+							<li>Note different port</li>
+							<li>Data will be partitioned to these two shards, based on shard key</li>
 						</ul>
 					</section>
 
