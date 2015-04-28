@@ -60,71 +60,107 @@
 					</p>
 
 					<aside class="notes">
-						Versatile data-processing framework – can run both in memory and on disk
-
-						Allows you to do a variety of things including real-time vs interactive vs batch
-
-						can write applications in Java, Scala, Python.
-
-						fast interactive queries, streaming analytics, graph analytics and machine learning.
+						
 					</aside>
 				</section>
 
 				<!-- Example of nested vertical slides -->
 				<section>
 					<section>
-						<h2>History</h2>
-						<img src="lib/img/timeline.png"></img>
+						<h2>Database Issues</h2>
+						<p class="fragment">
+							High throughput and large amounts data put a lot of stress on a single server.
+						</p>
+						<p class="fragment">
+							Set sizes larger than RAM stress I/O capacity
+						</p>
+						<p class="fragment">
+							High query rates can exhuast CPU capacity of a single server.
+						</p>
 						<aside class="notes">
 							Spark was developed in 2009 at UC Berkeley AMPLab, open sourced in 2010, and became a top-level Apache project in February, 2014. It has since become  one of the largest open source communities in big data, with over 200 contributors in 50+ organizations.
 						</aside>
 					</section>
 					<section>
-						<h2>History - Map Reduce</h2>
-						<p>
-							Two major problems:
-						</p>
+						<h2>Two Solutions</h2>
 						<ul>
-							<li class="fragment">difficulty programming in Map Reduce</li>
-							<li class="fragment">Batch style jobs not fitting all use cases</li>
+							<li class="fragment">Vertical Scaling:</li>
+								<ul>
+									<li class="fragment">Add more CPU and storage resources to a single server</li>
+									<li class="fragment">Limitations: Expensive.</li>
+								</ul> 
+
+							</br>
+							<li class="fragment">Sharding (Horizontal Scaling): </li>
+								<ul>
+									<li class="fragment">Distribute data set over multiple servers or shards</li>
+									<li class="fragment">Each shard is an independent db and all together they make up a single logical db.</li>
+								</ul>
 						</ul>
 						<aside class="notes">
-						Writing MapReduce code sucks, because the API is rudimentary, hard to test, and easy to screw up. Tool like Cascading, Pig, Hive, etc., make this easier, but that’s just more evidence that the core API is fundamentally flawed.
-
-						It requires lots of code to perform even the simplest of tasks.
-
-						Everything gets written to disk, including all the interim steps.
-
-						In many cases you need a chain of jobs to perform your analysis, making #1 even worse.
-
+						Vertical scaling adds more CPU and storage resources. High performance systems with large numbers of CPUs and large amounts of RAM are disproportionately more expensive than smaller systems. 
 						
 						</aside>
 					</section>
 					<section>
-						<h2>History - Workarounds</h2>
-						<img src="lib/img/workarounds.png"></img>
+						<h2>Sharded Collection</h2>
+						<img src="lib/img/sharded-collection.png"></img>
 
 						<aside class="notes">
-							many different technologies came out because of the limitations of map reduce. Storm being a real time processing framework. Pregel - large scale graph computing
+							Sharding reduces the number of operations each shard handles. Each shard processes fewer operations as the cluster grows. As a result, a cluster can increase capacity and throughput horizontally.
+
+							For example, to insert data, the application only needs to access the shard responsible for that record.
+							Sharding reduces the amount of data that each server needs to store. Each shard stores less data as the cluster grows.
+							For example, if a database has a 1 terabyte data set, and there are 4 shards, then each shard might hold only 256GB of data. If there are 40 shards, then each shard might hold only 25GB of data.
 						</aside>
 					</section>
 				</section>
 
 				<section>
 					<section>
-						<h2>Spark - Goals</h2>
-						<p class="fragment">Generalize Map Reduce</p>
-						<ul>
-							<li class="fragment">fast data sharing</li>
-							<li class="fragment">general DAGs (Directed Acyclic Graphs)</li>
-						</ul>
+						<h2>Sharding in MongoDB</h2>
+						<img src="lib/img/sharded-cluster-production-architecture.png"></img>
 						<aside class="notes">
-							goal was to generalize map reduce to support new apps with the same engine - SPARK. Two small additions are enough to express the previous models.
-							approach that is more efficient for engine and much simpler for end users
+							example of mongodb architecture, shards store data (replica sets provide high availability and data consistency (master-slave))
+
+							Query routers interface with client apps and give the client what information it needs from ceratin shards
+
+							config servers store cluster's metadata. production sharded clusters need exactly 3 config servers
 						</aside>
 					</section>
 					<section>
-						<img src="lib/img/codesize.png"></img>
+						<h2>Data Partitioning</h2>
+						<p class="fragment">
+							Sharding happens on a collection level.
+						</p>
+						<p class="fragment">
+							Sharding divides a collection's data by a shard key
+						</p>
+						<p class="fragment">
+							Two types of partitioning: <b>range based</b> and <b>hash based</b>
+						</p>
+						<aside class="notes">
+							example of mongodb architecture, shards store data (replica sets provide high availability and data consistency (master-slave))
+
+							Query routers interface with client apps and give the client what information it needs from ceratin shards
+
+							config servers store cluster's metadata. production sharded clusters need exactly 3 config servers
+						</aside>
+					</section>
+					
+					<section>
+						<h2>Ranged Based Paritioning</h2>
+						<img src="lib/img/sharding-range-based.png"></img>
+						<aside class="notes">
+							Ranged based sharding - MongoDB divides data set into ranges determined by shard key values. I.e. if x is your shardkey all x's between -75 and 25 will be on one shard... etc
+						</aside>
+					</section>
+					<section>
+						<h2>Hash Based Paritioning</h2>
+						<img src="lib/img/sharding-hash-based.png"></img>
+						<aside class="notes">
+							Hash based sharding uses a hash function to determine where each piece of data goes to which shard.
+						</aside>
 					</section>
 				</section>
 
