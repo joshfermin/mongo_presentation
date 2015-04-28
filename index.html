@@ -6,7 +6,7 @@
 
 		<title>Mongo Sharding + GridFS - Josh Fermin</title>
 
-		<meta name="description" content="Apache Spark - Cluster Computing">
+		<meta name="description" content="Mongo Sharding + GridFS">
 		<meta name="author" content="Josh Fermin">
 
 		<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -15,7 +15,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/sky.css" id="theme">
+		<link rel="stylesheet" href="css/theme/solarized.css" id="theme">
 
 		<!-- Code syntax highlighting -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -64,7 +64,6 @@
 					</aside>
 				</section>
 
-				<!-- Example of nested vertical slides -->
 				<section>
 					<section>
 						<h2>Database Issues</h2>
@@ -168,44 +167,50 @@
 					<section>
 						<h2>Mongo Sharding Tutorial</h2>
 						<p>
-						<a href="https://spark.apache.org/docs/latest/quick-start.html">Problem:</a> Count how many lines a word shows up in a document
+						Taken from <a href="http://docs.mongodb.org/manual/tutorial/deploy-shard-cluster/">Mongo Docs.</a>
 						</p>
 						<aside class="notes">
 							
 						</aside>
 					</section>
 					<section>
-						<h2>Spark Shell - Scala</h2>
-						<small>Spark Download <a href="https://spark.apache.org/downloads.html">here</a> (use prebuilt version)</small>
-							<pre><code>./bin/spark-shell/</pre></code>
-							<pre><code>./bin/pyspark/</pre></code>
-							
+						<h2>Fire Up Config Server</h2>
+						<small>Download Mongo<a href="http://docs.mongodb.org/manual/installation/"> here</a></small>
+							<pre><code>mkdir /data/configdb</pre></code>
+							<pre><code>mongod --configsvr --dbpath /data/configdb</pre></code>
+						<ul>
+							<li>data/configdb where server metadata will be stored</li>
+							<li>In production, run configsvr on three different hosts</li>
+						</ul>
 						<aside class="notes">
-							Starts the shell in scala using ./bin/spark-shell/
-							can also start in python ./bin/pyspark
+							Start config server that holds metadata for cluster
 
-							can download spark there, need to build or have prebuilt version for these commands to work
+
+							- configsvr is flag to tell mongo that it is a config server
+							- data/configdb is where the metadata about the server will be stored - (Default listening on port 27019)
+							- usually running configsvr on three different hosts
+
 						</aside>
 					</section>
 
 					<section>
-					<h2> Spark Context </h2>
-					<pre><code>scala> val textFile = sc.textFile("README.md")
-textFile: spark.RDD[String] = spark.MappedRDD@2ee9b6e3</pre></code>
+					<h2>Setup Mongos - Routing Service</h2>
+					<pre><code>mongos --configdb localhost:27019 --port 27017</pre></code>
 					<ul>
-						<li>Start spark context</li>
-						<li>Creates RDD (Resilient Distributed Dataset)</li>
+						<li>Lightweight, do not require data directories</li>
+						<li>Usually have two of these in production</li>
 					</ul>
 					<aside class="notes">
-						Next line starts a spark context which represents a connection to a spark cluster.
-						Can be used to create RDDs.
+						In a separate terminal window, use this command which will start the mongos router instance which wil route all queries to the database for you to get the correct data
 					</aside>
 					</section>
 					
 					<section>
-						<h2>RDDs</h2>
+						<h2>Create DBs for Shards</h2>
+						<pre><code>mkdir /data/shard1</pre></code>
+						<pre><code>mongod --dbpath /data/shard1 --port 27018 --shardsvr</pre></code>
 						<ul>
-							<li>Spark's primary abstraction</li>
+							<li></li>
 							<li>Distributed collection of items</li>
 							<li>Can be stored in the volatile memory or in a persistent storage </li>
 						</ul>
