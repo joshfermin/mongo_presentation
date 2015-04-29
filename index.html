@@ -242,7 +242,7 @@
 						<p>
 							Then enable sharding on each:
 						</p>
-						<pre><code>mongos> sh.enableSharding(“testDBShard”)</code><code>mongos> sh.shardCollection(“testDB.testCollection”, { “md5”:”hashed” })</code></pre>
+						<pre><code>mongos> sh.enableSharding(“testDB”)</code><code>mongos> sh.shardCollection(“testDB.testCollection”, { “md5”:”hashed” })</code></pre>
 						<small>Second param is choosing the shard key as md5 with hash partitioning. </small>
 						<small>For range based do: "md5":1</small>
 						<aside class="notes">
@@ -264,20 +264,77 @@
 				
 			<section>
 				<section>
-					<h2>I have Shards, now what?</h2>
-					<p></p>
+					<h2>So What is this <a href="http://docs.mongodb.org/manual/core/gridfs/">GridFS</a> business?</h2>
+					<p>GridFS is an extension on top of mongo</p>
+					<p>Allows you to store/retrieve files that exceed BSON doc limit of 16mb</p>
 					<aside class="notes">
-						In a separate terminal window, use this command which will start the mongos router instance which wil route all queries to the database for you to get the correct data
+						
 					</aside>
 				</section>
+
+				<section>
+					<h2>How is that possible?</h2>
+					<p>Instead of one doc per file, GridFS breaks it into 255k chunks.</p>
+					<p>Each chunk becomes a separate document.</p>
+					<p>When you query for a file, the driver or client will reassemble it as needed.</p>
+				</section>
+
+				<section>
+					<h2>GridFS Collections</h2>
+						<p>GridFS uses <b>two collections</b> to store files.</p>
+						<ul>
+							<li>Chunks: store binary chunks</li>
+							<li>Files: store file metadata</li>
+						</ul>
+				</section>
 			</section>
+			<section>
+				<section>
+					<h2>Implementation</h2>
+					<p>Two ways:</p>
+						<ul>
+							<li><a href="http://docs.mongodb.org/manual/applications/drivers/">Drivers:</a> Basically a high level API</li>
+							<li><a href="http://docs.mongodb.org/manual/reference/program/mongofiles/#bin.mongofiles">mongofiles:</a> mongo shell command line tool</li>
+						</ul>
+				</section>
+
+				<section>
+					<h2>Example - <a href="http://api.mongodb.org/csharp/current/html/R_Project_CSharpDriverDocs.htm">C# Driver</a></h2>
+					<pre><code>using MongoDB.Driver;
+using MongoDB.Driver.GridFS;</code></pre>
+				</section>
+
+				<section>
+				<h2>Connect to mongos and get info</h2>
+					<pre><code>MongoClient client = new MongoClient("mongodb://localhost:27017");
+￼MongoServer server = client.GetServer();
+￼MongoDatabase database = server.GetDatabase("testDB");
+￼MongoCollection testCollection = database.GetCollection("testCollection");</code></pre>
+				</section>
+
+				<section>
+				<h2>GridFS Driver</h2>
+					<pre><code>MongoGridFS gfs = new MongoGridFS(database);
+gfs.Upload(@"C:\test.txt");</code></pre>
+
+				<small>After uploading, the chunks and files collections will be created.</small>
+				</section>
+			</section>
+
+			<section>
+				<h2>Conclusion</h2>
+				<ul>
+					<li>If everything was set up correctly you can now read/write any files you want (movies, music, etc) into mongo using GridFS</li>
+					<li>You can shard on the chunks collection if you'd like giving you horizontal scaling.</li>
+					<li>Learned how to use MongoDB Sharding and GridFS API</li>
+				</ul>
+				</section>
 
 				<section>
 					<h2>Resources</h2>
 					<ul>
 						<li><a href="http://docs.mongodb.org/manual/tutorial/deploy-shard-cluster/">Deploy a Sharded Cluster</a></li>
 						<li><a href="http://docs.mongodb.org/master/MongoDB-sharding-guide.pdf">Mongo Sharding Guide</a></li>
-						<li><a href="http://www.thecloudavenue.com/2014/01/resilient-distributed-datasets-rdd.html">Learning about RDDs</a></li>
 					</ul>
 				</section>
 			</div>
